@@ -1,2 +1,2 @@
 # tools
-simple tools in C/C++
+simple tools
