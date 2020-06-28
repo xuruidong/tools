@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 		rbuf.data[recv_len] = 0;
 		inet_ntop(AF_INET,&raddr.sin_addr,ipstr,STRSIZE);
 		printf("--MESSAGE FROME:%s:%d--\n",ipstr,ntohs(raddr.sin_port));
-		printf("recv len: %d, recv data : %s\n",recv_len, rbuf.data);
+		printf("recv len: %zd, recv data : %s\n",recv_len, rbuf.data);
 
 		if(sendto(sd, &rbuf, recv_len, 0, (void *)&raddr, raddr_len) < 0){
 			perror("sendto()");
