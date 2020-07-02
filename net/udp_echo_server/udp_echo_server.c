@@ -8,14 +8,11 @@
 
 #define STRSIZE		40
 
-struct msg_st{
-	char data[1024];
-};
 
 int main(int argc, char *argv[])
 {
 	int sd;
-	struct msg_st rbuf;
+	char rbuf[10240] = {0};
 	struct sockaddr_in laddr,raddr;
 	socklen_t raddr_len;
 	char ipstr[STRSIZE];
@@ -54,17 +51,17 @@ int main(int argc, char *argv[])
 
 	while(1)
 	{
-		recv_len = recvfrom(sd,&rbuf,sizeof(rbuf),0,(void *)&raddr,&raddr_len);
+		recv_len = recvfrom(sd, rbuf, sizeof(rbuf),0,(void *)&raddr,&raddr_len);
 		if(recv_len < 0){
 			perror("recvfrom()");
 			exit(1);
 		}
-		rbuf.data[recv_len] = 0;
+		rbuf[recv_len] = 0;
 		inet_ntop(AF_INET,&raddr.sin_addr,ipstr,STRSIZE);
 		printf("--MESSAGE FROME:%s:%d--\n",ipstr,ntohs(raddr.sin_port));
-		printf("recv len: %zd, recv data : %s\n",recv_len, rbuf.data);
+		printf("recv len: %zd, recv data : %s\n",recv_len, rbuf);
 
-		if(sendto(sd, &rbuf, recv_len, 0, (void *)&raddr, raddr_len) < 0){
+		if(sendto(sd, rbuf, recv_len, 0, (void *)&raddr, raddr_len) < 0){
 			perror("sendto()");
 			exit(1);
 		}
