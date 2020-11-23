@@ -22,6 +22,7 @@ class recvRequestsHandler(BaseHTTPRequestHandler):
         
     def do_GET(self):
         print ("Recv http GET request from %s" % str(self.client_address))
+        print (self.path)
         self.send_response(200, "recv GET request success")
         self.send_header("Content-type", "text/html; charset=UTF-8")
         self.end_headers()
@@ -49,6 +50,7 @@ class recvRequestsHandler(BaseHTTPRequestHandler):
     
     def do_POST(self):
         print ("Recv http POST request from %s @%s" %(str(self.client_address),get_localtime()))
+        print (self.path)
         recvData = self.rfile.read(int(self.headers['Content-Length']))
         print (recvData)
         self.send_response(200,"Recv POST request success")
