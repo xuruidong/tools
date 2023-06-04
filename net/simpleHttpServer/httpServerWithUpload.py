@@ -12,6 +12,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from io import BytesIO
+from bs4 import UnicodeDammit
 
 class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     """简单的http文件服务器，支持上传下载
@@ -67,7 +68,9 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             return (False, "Content NOT begin with boundary")
         line = self.rfile.readline()
         remainbytes -= len(line)
-        fn = re.findall(r'Content-Disposition.*name="file"; filename="(.*)"', line.decode())
+        dammit = UnicodeDammit(line)
+        print(dammit.original_encoding)
+        fn = re.findall(r'Content-Disposition.*name="file"; filename="(.*)"', line.decode(dammit.original_encoding))
         if not fn:
             return (False, "Can't find out file name...")
         path = self.translate_path(self.path)
