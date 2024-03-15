@@ -3,6 +3,8 @@ import os,sys,time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import socket
+import ssl
+import argparse
 
 os.path.dirname(__file__)
 
@@ -76,20 +78,27 @@ class recvRequestsHandler(BaseHTTPRequestHandler):
             self.log_error("Request timed out: %r", e)
             self.close_connection = True
             return    
-    
-
-def taskRecvProbeRequests(listen_ip,listen_port):
-    addr = (listen_ip,listen_port)
-    server = HTTPServer(addr,recvRequestsHandler)
-    print ("listening at %s ......"%(str(addr)))
-    server.serve_forever()
-    return 0
-
-
-    
 
     
 if __name__ == "__main__":
+    args = argparse.ArgumentParser(description = 'argparse Information ',
+                                   epilog = 'argparse end ')
+    args.add_argument("--ip", "-H", 
+                    default = "", help = "set ip, default: 0.0.0.0")
+    args.add_argument("--port", "-p",  type = int, 
+                    default = 8080, help = "set port, default: 8080")
+    args.add_argument("--ssl", "-s",  action='store_true', 
+                    help = "enable ssl")
+    args = args.parse_args()
     
-    taskRecvProbeRequests('', 8080)
+    print (args)
+    print (args.ip)
+    print (args.port)
+    print (args.ssl)
     
+    addr = (args.ip, args.port)
+    server = HTTPServer(addr,recvRequestsHandler)
+    if args.ssl:
+        server.socket = ssl.wrap_socket(server.socket, certfile='cert/test.cert.pem', keyfile='cert/test.key.pem', server_side=True)
+    print ("listening at %s ......"%(str(addr)))
+    server.serve_forever()
