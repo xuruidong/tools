@@ -81,6 +81,7 @@ class recvRequestsHandler(BaseHTTPRequestHandler):
 class httpStreamServer(recvRequestsHandler):
     def do_handle(self):
         print ("Recv http request from %s @%s" %(str(self.client_address),get_localtime()))
+        self.protocol_version = "HTTP/1.1"
         content_length = int(self.headers.get('Content-Length', 0))
         recvData = self.rfile.read(content_length)
         print (recvData)
