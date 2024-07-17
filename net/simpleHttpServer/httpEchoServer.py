@@ -32,11 +32,12 @@ class recvRequestsHandler(BaseHTTPRequestHandler):
             headers[hd] = self.headers[hd]
         retDic = {}
         retDic["method"] = self.command
-        retDic["path"] = self.path
+        retDic["path"] = self.path.split("?")[0]
         retDic["headers"] = headers
         retDic["body"] = recvData.decode()
-        retDic["query"] = self.requestline
+        retDic["query"] = self.path.split("?")[1] if "?" in self.path else ""
         self.wfile.write(bytes(json.dumps(retDic), 'utf-8'))
+        print(json.dumps(retDic))
         
 
     def handle_one_request(self):
