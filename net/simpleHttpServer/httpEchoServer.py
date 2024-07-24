@@ -20,10 +20,32 @@ class recvRequestsHandler(BaseHTTPRequestHandler):
     
     def do_handle(self):
         print ("Recv http request from %s @%s" %(str(self.client_address),get_localtime()))
-        content_length = int(self.headers.get('Content-Length', 0))
-        recvData = self.rfile.read(content_length)
+        transfer_encoding = self.headers.get('transfer-encoding')
+        if transfer_encoding == 'chunked':
+            chunk_list = []
+            while True:
+                chunk_len_bytes = self.rfile.readline(65537)
+                if len(chunk_len_bytes) > 65535:
+                    print("error: chunk size")
+                    return
+
+                print("bytes chunk:", chunk_len_bytes)
+                chunk_len = int(chunk_len_bytes, 16)
+                print("chunk size:", chunk_len)
+                if chunk_len == 0:
+                    break
+                chunk = self.rfile.read(chunk_len)
+                chunk_list.append(chunk.decode())
+                chunk = self.rfile.read(2)
+
+            recvData = chunk_list
+                    
+        else:
+            content_length = int(self.headers.get('Content-Length', 0))
+            recvData = self.rfile.read(content_length).decode()
+        
         print (recvData)
-        self.send_response(200,"Recv POST request success")
+        self.send_response(200,"OK")
         self.send_header("Content-type", "application/json; charset=UTF-8")
         self.end_headers()
         
@@ -34,7 +56,7 @@ class recvRequestsHandler(BaseHTTPRequestHandler):
         retDic["method"] = self.command
         retDic["path"] = self.path.split("?")[0]
         retDic["headers"] = headers
-        retDic["body"] = recvData.decode()
+        retDic["body"] = recvData
         retDic["query"] = self.path.split("?")[1] if "?" in self.path else ""
         self.wfile.write(bytes(json.dumps(retDic), 'utf-8'))
         print(json.dumps(retDic))
